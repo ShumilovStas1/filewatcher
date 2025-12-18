@@ -8,6 +8,7 @@ dependencies = [
     "dynaconf>=3.2.12",
     "eventlet>=0.40.4",
     "gunicorn>=23.0.0",
+    "pytest>=9.0.2",
     "python-socketio>=5.15.1",
     "watchdog>=6.0.0",
 ]

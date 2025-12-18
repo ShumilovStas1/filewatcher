@@ -15,8 +15,8 @@ def test_file_creation(tmp_path):
     watcher.stop()
     events: list[Event] = list(q.queue)
     assert len(events) == 1
-    assert events[0].type == "created"
-    assert events[0].src_path == str(tmp_path / "testfile.txt")
+    assert events[0].event_type == "created"
+    assert events[0].src_path == "testfile.txt"
 
 
 def test_dir_creation(tmp_path):
@@ -28,8 +28,8 @@ def test_dir_creation(tmp_path):
     watcher.stop()
     events = list(q.queue)
     assert len(events) == 1
-    assert events[0].type == "created"
-    assert events[0].src_path == str(tmp_path / "new_dir")
+    assert events[0].event_type == "created"
+    assert events[0].src_path == "new_dir"
 
 def test_file_modification(tmp_path):
     with open(tmp_path / "modified.txt", "w") as f:
@@ -44,8 +44,8 @@ def test_file_modification(tmp_path):
     watcher.stop()
     events = list(q.queue)
     assert len(events) == 1
-    assert events[0].type == "modified"
-    assert events[0].src_path == str(tmp_path / "modified.txt")
+    assert events[0].event_type == "modified"
+    assert events[0].src_path == "modified.txt"
 
 def test_file_deletion(tmp_path):
     with open(tmp_path / "to_delete.txt", "w") as f:
@@ -58,8 +58,8 @@ def test_file_deletion(tmp_path):
     watcher.stop()
     events = list(q.queue)
     assert len(events) == 1
-    assert events[0].type == "deleted"
-    assert events[0].src_path == str(tmp_path / "to_delete.txt")
+    assert events[0].event_type == "deleted"
+    assert events[0].src_path == "to_delete.txt"
 
 def test_dir_deletion(tmp_path):
     (tmp_path / "to_delete_dir").mkdir()
@@ -72,8 +72,8 @@ def test_dir_deletion(tmp_path):
     events: list[Event] = list(q.queue)
     print("Events:", events)
     assert len(events) == 1
-    assert events[0].type == "deleted"
-    assert events[0].src_path == str(tmp_path / "to_delete_dir")
+    assert events[0].event_type == "deleted"
+    assert events[0].src_path == "to_delete_dir"
 
 def test_file_move(tmp_path):
     (tmp_path / "2").mkdir()
@@ -88,9 +88,9 @@ def test_file_move(tmp_path):
     watcher.stop()
     events = list(q.queue)
     assert len(events) == 1
-    assert events[0].type == "moved"
-    assert events[0].src_path == str(tmp_path / "1/to_move.txt")
-    assert events[0].dest_path == str(tmp_path / "2/to_move.txt")
+    assert events[0].event_type == "moved"
+    assert events[0].src_path == "1/to_move.txt"
+    assert events[0].dest_path == "2/to_move.txt"
 
 def test_dir_move(tmp_path):
     (tmp_path / "2").mkdir()
@@ -103,22 +103,9 @@ def test_dir_move(tmp_path):
     watcher.stop()
     events = list(q.queue)
     assert len(events) == 1
-    assert events[0].type == "moved"
-    assert events[0].src_path == str(tmp_path / "2")
-    assert events[0].dest_path == str(tmp_path / "1/2")
-
-# def test_dir_change_permissions(tmp_path):
-#     os.mkdir(tmp_path / "perm_dir")
-#     q: Queue = Queue()
-#     watcher = Watcher(q, [tmp_path])
-#     watcher.start()
-#     os.chmod(tmp_path / "perm_dir", 0o777)
-#     wait_for_events(q, expected_count=1)
-#     watcher.stop()
-#     events = list(q.queue)
-#     assert len(events) == 1
-#     assert isinstance(events[0], DirModifiedEvent)
-
+    assert events[0].event_type == "moved"
+    assert events[0].src_path ==  "2"
+    assert events[0].dest_path ==  "1/2"
 
 def wait_for_events(queue, expected_count, timeout=2.0):
     start = time.time()
@@ -127,4 +114,3 @@ def wait_for_events(queue, expected_count, timeout=2.0):
             return
         time.sleep(0.01)
     raise AssertionError(f"Timed out waiting for {expected_count} events")
-
