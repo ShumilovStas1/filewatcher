@@ -1,19 +1,26 @@
+import os
+
 from dynaconf import Dynaconf, Validator
 import logging.config
 
-settings = Dynaconf(
-    envvar_prefix="FW",
-    settings_files=[ "settings.yaml"],
-    validators=[
-        Validator("log_level", required=True, is_type_of=str,
-                  is_in=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-                  default="INFO", apply_default_on_none=True),
-        Validator("watch_dirs", required=True, is_type_of=list)
-    ]
-)
+try:
+    settings = Dynaconf(
+        envvar_prefix="FW",
+        settings_files=[ "settings.yaml"],
+        validators=[
+            Validator("log_level", required=True, is_type_of=str,
+                      is_in=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+                      default="INFO", apply_default_on_none=True),
+            Validator("watch_dirs", required=True, is_type_of=list)
+        ]
+    )
+except Exception as e:
+    print(f"Failed to load configuration: {e}")
+    exit(1)
 
 print("Config:", settings.as_dict())
 
+os.makedirs('log', exist_ok=True)
 logging_conf = {
     'version': 1,
     'disable_existing_loggers': True,
@@ -61,10 +68,3 @@ ctx["start_background_worker"]()
 ctx["watcher"].start()
 
 app = ctx["app"]
-
-if __name__ == "__main__":
-    import eventlet
-    import eventlet.wsgi
-
-    log.info("Starting local test server on http://127.0.0.1:5000")
-    eventlet.wsgi.server(eventlet.listen(("127.0.0.1", 5000)), app)

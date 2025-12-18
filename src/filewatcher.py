@@ -1,6 +1,5 @@
 import logging
 import os
-from threading import Lock
 
 from watchdog.events import FileSystemEventHandler, \
     DirModifiedEvent, FileModifiedEvent, DirDeletedEvent, FileDeletedEvent, DirCreatedEvent, \
@@ -79,8 +78,6 @@ class FileWatcher:
         self.path_list = self._validate_paths(path_list)
         self.queue = queue
         self.observer: Observer | None = None
-        self._lock = Lock()
-        self._clients = 0
 
     @staticmethod
     def _validate_paths(path_list: list[str]) -> list[str]:
