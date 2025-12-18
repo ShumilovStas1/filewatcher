@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  filewatcher:
+    image: filewatcher
+    container_name: filewatcher
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      FW_WATCH_DIRS: "['/app/dir/1','/app/dir/2', '/app/dir/nonexistent']"
+      FW_LOG_LEVEL: "INFO"
+    volumes:
+      - ./dir:/app/dir
+      - ./log:/app/log

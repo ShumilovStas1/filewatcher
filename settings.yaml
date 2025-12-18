@@ -1,0 +1,5 @@
+watch_dirs:
+  - dir/
+  - home/test/
+  - dir/1/
+log_level: INFO
