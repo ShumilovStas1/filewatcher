@@ -35,7 +35,7 @@ cd filewatcher
 Install [`uv` tool](https://github.com/astral-sh/uv)
 
 ```bash
-uv run gunicorn -w 1 --bind 0.0.0.0:5000 src.main:app 
+uv run gunicorn -w 1 -k eventlet --bind 0.0.0.0:5000 src.main:app 
 ```
 
 ### Using Docker

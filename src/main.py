@@ -14,11 +14,9 @@ try:
             Validator("watch_dirs", required=True, is_type_of=list)
         ]
     )
+    print("Config:", settings.as_dict())
 except Exception as e:
-    print(f"Failed to load configuration: {e}")
-    exit(1)
-
-print("Config:", settings.as_dict())
+    raise Exception(f"Failed to load configuration: {e}")
 
 os.makedirs('log', exist_ok=True)
 logging_conf = {
@@ -61,10 +59,34 @@ logging_conf = {
 logging.config.dictConfig(logging_conf)
 log = logging.getLogger(__name__)
 
+def validate_paths(path_list: list[str]) -> list[str]:
+    valid = []
+    for path in path_list:
+        if path:
+            if not os.path.isdir(path):
+                log.warning(f"Path does not exist or is not a directory: {path}")
+            elif not os.access(path, os.R_OK):
+                log.warning(f"Path is not readable: {path}")
+            else:
+                valid.append(os.path.abspath(path))
+    if not valid:
+        log.critical("No valid directories to watch. Use settings.yaml or FW_WATCH_DIR env variable.")
+        raise Exception("No valid directories to watch. Please specify valid directories via settings.yaml or FW_WATCH_DIR env variable Exiting.")
+    return valid
+
+valid_paths: list[str] = validate_paths(settings.watch_dirs)
+
 from .ws_api import create_app
-ctx = create_app(watch_dirs=settings.watch_dirs)
+ctx = create_app(watch_dirs=valid_paths)
 log.info("Starting background worker thread")
 ctx["start_background_worker"]()
 ctx["watcher"].start()
 
 app = ctx["app"]
+
+if __name__ == "__main__":
+    import eventlet
+    import eventlet.wsgi
+
+    log.info("Starting local test server on http://127.0.0.1:5000")
+    eventlet.wsgi.server(eventlet.listen(("127.0.0.1", 5000)), app)

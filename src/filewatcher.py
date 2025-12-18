@@ -75,21 +75,9 @@ class FileEventHandler(FileSystemEventHandler):
 
 class FileWatcher:
     def __init__(self, queue: Queue[Event], path_list: list[str]):
-        self.path_list = self._validate_paths(path_list)
+        self.path_list = path_list
         self.queue = queue
         self.observer: Observer | None = None
-
-    @staticmethod
-    def _validate_paths(path_list: list[str]) -> list[str]:
-        valid = []
-        for path in path_list:
-            if not os.path.isdir(path):
-                log.warning(f"Path does not exist or is not a directory: {path}")
-            elif not os.access(path, os.R_OK):
-                log.warning(f"Path is not readable: {path}")
-            else:
-                valid.append(os.path.abspath(path))
-        return valid
 
     def start(self):
         log.info(f"Starting watcher on paths: {self.path_list}")
